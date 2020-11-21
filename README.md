@@ -24,23 +24,25 @@ yarn add nano-slots
 ### Create component and define slots
 
 ```js
+import { Box, Flex } from 'theme-ui'
 import { SlotsProvider, Slot } from 'nano-slots'
 
-export const Card = ({ children }) => (
+export const MediaObject = ({ children }) => (
   <SlotsProvider>
-    <div className="c-card">
-      <div className="c-card-side">
-        <Slot name="card-image" />
-      </div>
-      <div className="c-card-main">
-        <div className="c-card-main-title">
-          <Slot name="card-title" />
-        </div>
-        <div className="c-card-main-content">
-          {children}
-        </div>
-      </div>
-    </div>
+    <Flex>
+      <Box mr={3}>
+        <Slot name="media-side" />
+      </Box>
+      <Box>
+        <Box mb={2}>
+          <Slot name="media-title" />
+        </Box>
+        <Box>
+          <Slot name="media-description" />
+        </Box>
+        {children}
+      </Box>
+    </Flex>
   </SlotsProvider>
 )
 ```
@@ -49,20 +51,24 @@ export const Card = ({ children }) => (
 
 ```js
 import { Fill } from 'nano-slots'
-import { Card } from './card'
+import { MediaObject } from './media-object'
 
 const MyApp = () => (
-  <Card>
-    <Fill name="card-image">
-      <img src='https://placekitten.com/200' />
+  <MediaObject>
+    <Fill name="media-side">
+      <img src='https://placekitten.com/200' alt="Kitten" />
     </Fill>
-    <Fill name="card-title">
+    <Fill name="media-title">
       <h3>Mew</h3>
     </Fill>
-    <p>Purr purr purr</p>
-  </Card>
+    <Fill name="media-description">
+      <p>Purr purr purr</p>
+    </Fill>
+  </MediaObject>
 )
 ```
+
+[![Edit nano-slots](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/nano-slots-s0y0t?fontsize=14&hidenavigation=1&theme=dark)
 
 ## 📖 API
 
