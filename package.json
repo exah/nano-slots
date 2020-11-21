@@ -13,6 +13,14 @@
     "esm",
     "types"
   ],
+  "keywords": [
+    "react",
+    "slot",
+    "fill",
+    "composition",
+    "portal",
+    "lightweight"
+  ],
   "scripts": {
     "build": "run-s build:*",
     "build:esm": "tsc -p tsconfig.esm.json",
