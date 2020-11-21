@@ -1,8 +1,8 @@
 import '@testing-library/jest-dom/extend-expect'
 import { screen, render } from '@testing-library/react'
-import React, { useState } from 'react'
-import ReactDOM from 'react-dom'
-import ReactDOMServer from 'react-dom/server'
+import { useState } from 'react'
+import { hydrate } from 'react-dom'
+import { renderToString } from 'react-dom/server'
 import { Fill, Slot, SlotsProvider } from '.'
 
 let isServer = false
@@ -119,7 +119,7 @@ test('should hydrate without errors on server render', async () => {
   const root = document.createElement('div')
   const warn = jest.spyOn(console, 'warn')
   const error = jest.spyOn(console, 'error')
-  const html = ReactDOMServer.renderToString(element)
+  const html = renderToString(element)
 
   expect(warn).not.toHaveBeenCalled()
   expect(error).not.toHaveBeenCalled()
@@ -128,7 +128,7 @@ test('should hydrate without errors on server render', async () => {
   root.innerHTML = html
 
   isServer = false
-  ReactDOM.hydrate(element, root)
+  hydrate(element, root)
 
   expect(warn).not.toHaveBeenCalled()
   expect(error).not.toHaveBeenCalled()

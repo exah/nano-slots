@@ -6,7 +6,6 @@
     "strict": true,
     "jsx": "react-jsx",
     "esModuleInterop": true,
-    "noEmitHelpers": true,
     "noUnusedLocals": true,
     "downlevelIteration": true
   },
