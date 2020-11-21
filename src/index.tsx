@@ -38,10 +38,12 @@ export interface SlotsProviderProps {
   children: React.ReactNode
 }
 
-export function SlotsProvider({ children }: SlotsProviderProps) {
+export function SlotsProvider(props: SlotsProviderProps) {
   const emitter = useMemo(() => createNanoEvents<SlotsEventsMap>(), [])
   return (
-    <SlotsContext.Provider value={emitter}>{children}</SlotsContext.Provider>
+    <SlotsContext.Provider value={emitter}>
+      {props.children}
+    </SlotsContext.Provider>
   )
 }
 
@@ -49,7 +51,7 @@ function useSlotsContext() {
   const context = useContext(SlotsContext)
 
   if (context === null) {
-    throw new Error('Hook must be used with `SlotsProvider`')
+    throw new Error('Must be used inside `SlotsProvider`')
   }
 
   return context
