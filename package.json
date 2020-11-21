@@ -28,7 +28,8 @@
     "build:types": "tsc -p tsconfig.types.json",
     "test": "jest",
     "size": "size-limit",
-    "release": "np"
+    "release": "np",
+    "preversion": "npm run build"
   },
   "size-limit": [
     {
