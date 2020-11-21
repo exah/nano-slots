@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig",
+  "compilerOptions": {
+    "declaration": true,
+    "declarationDir": "./types",
+    "emitDeclarationOnly": true
+  },
+  "exclude": ["node_modules", "src/**/*.test.tsx"]
+}

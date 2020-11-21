@@ -1,0 +1,56 @@
+{
+  "name": "nano-slots",
+  "version": "0.0.0",
+  "main": "cjs/index.js",
+  "module": "esm/index.js",
+  "types": "types/index.d.ts",
+  "sideEffects": false,
+  "repository": "git@github.com:exah/nano-slots.git",
+  "author": "Ivan Grishin <r@exah.me>",
+  "license": "MIT",
+  "files": [
+    "cjs",
+    "esm",
+    "types"
+  ],
+  "scripts": {
+    "build": "run-s build:*",
+    "build:esm": "tsc -p tsconfig.esm.json",
+    "build:cjs": "tsc -p tsconfig.cjs.json",
+    "build:types": "tsc -p tsconfig.types.json",
+    "test": "jest",
+    "size": "size-limit"
+  },
+  "size-limit": [
+    {
+      "path": "./esm/index.js",
+      "limit": "500 B"
+    }
+  ],
+  "jest": {
+    "preset": "ts-jest"
+  },
+  "dependencies": {
+    "nanoevents": "^5.1.10"
+  },
+  "peerDependencies": {
+    "react": "^17.0.0"
+  },
+  "devDependencies": {
+    "@size-limit/preset-small-lib": "^4.9.0",
+    "@testing-library/jest-dom": "^5.11.6",
+    "@testing-library/react": "^11.2.2",
+    "@types/jest": "^26.0.15",
+    "@types/react": "^16.14.1",
+    "@types/react-dom": "^17.0.0",
+    "@types/testing-library__jest-dom": "^5.9.5",
+    "csstype": "^3.0.5",
+    "jest": "^26.6.3",
+    "npm-run-all": "^4.1.5",
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1",
+    "size-limit": "^4.9.0",
+    "ts-jest": "^26.4.4",
+    "typescript": "^4.1.2"
+  }
+}
