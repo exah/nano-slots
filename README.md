@@ -1,6 +1,6 @@
 # nano-slots
 
-Super lightweight modern alternative to [`react-slot-fill`](https://github.com/camwest/react-slot-fill) with familiar API.
+A super lightweight modern alternative to [`react-slot-fill`](https://github.com/camwest/react-slot-fill) with familiar API.
 
 - [x] Control sub-components rendering with `Slot` and `Fill`
 - [x] Render content of sub-component in multiple places
@@ -21,7 +21,7 @@ yarn add nano-slots
 
 ## 💻 Usage
 
-### Create component and define slots
+### Create a component and define slots
 
 ```js
 import { Box, Flex } from 'theme-ui'
@@ -47,7 +47,7 @@ export const MediaObject = ({ children }) => (
 )
 ```
 
-### Render elements directly inside each slots
+### Render elements directly inside each slot
 
 ```js
 import { Fill } from 'nano-slots'
@@ -99,7 +99,7 @@ import { Slot } from 'nano-slots'
 
 #### Description
 
-Define target slot for `Fill` component, can be used multiple times with same name inside each `SlotsProvider`
+Define the target slot for `Fill` component, can be used multiple times with the same name inside each `SlotsProvider`
 
 ### `Fill`
 
@@ -134,7 +134,7 @@ export function Slot(props: SlotProps): JSX.Element;
 
 export interface FillProps {
   name: string;
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }
 
 export function Fill(props: FillProps): null;
@@ -142,8 +142,8 @@ export function Fill(props: FillProps): null;
 
 ## Alternatives
 
-- [react-slot-fill](https://github.com/camwest/react-slot-fill) - abandoned project that inspired this one
-- [react-view-slot](https://github.com/robik/react-view-slot) - more modern approach but [12x times bigger](https://bundlephobia.com/result?p=react-view-slot@1.0.1)
+- [`react-slot-fill`](https://github.com/camwest/react-slot-fill) - abandoned project that inspired this one
+- [`react-view-slot`](https://github.com/robik/react-view-slot) - more modern approach, but [12x times bigger](https://bundlephobia.com/result?p=react-view-slot@1.0.1)
 
 ---
 MIT © John Grishin
