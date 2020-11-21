@@ -83,7 +83,7 @@ export function Slot(props: SlotProps) {
   return <>{state === undefined ? props.children : state}</>
 }
 
-export interface FillProps extends Required<SlotProps> {}
+export interface FillProps extends SlotProps {}
 
 export function Fill(props: FillProps) {
   const emitter = useSlotsContext()
