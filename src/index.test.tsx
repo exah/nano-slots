@@ -75,8 +75,8 @@ function defaultTest() {
   expect(nestedSlots).toHaveLength(2)
   expect(nestedFills).toHaveLength(2)
 
-  for (const [index, nestedSlot] of nestedSlots.entries()) {
-    const nestedFill = nestedFills[index]
+  for (const nestedSlot of nestedSlots) {
+    const nestedFill = nestedFills[nestedSlots.indexOf(nestedSlot)]
 
     expect(nestedSlot).toBeInTheDocument()
     expect(nestedFill).toBeInTheDocument()
