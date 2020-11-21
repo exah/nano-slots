@@ -19,52 +19,119 @@ npm i -S nano-slots
 yarn add nano-slots
 ```
 
-```js
-import { SlotsProvider, Slot, Fill } from 'nano-slots'
-```
-
 ## 💻 Usage
 
-### Create component and define slots with `Slot`
+### Create component and define slots
 
 ```js
-function Card({ children }) {
-  return (
-    <SlotsProvider>
-      <div className="c-card">
-        <div className="c-card-side">
-          <Slot name="card-image" />
+import { SlotsProvider, Slot } from 'nano-slots'
+
+export const Card = ({ children }) => (
+  <SlotsProvider>
+    <div className="c-card">
+      <div className="c-card-side">
+        <Slot name="card-image" />
+      </div>
+      <div className="c-card-main">
+        <div className="c-card-main-title">
+          <Slot name="card-title" />
         </div>
-        <div className="c-card-main">
-          <div className="c-card-main-title">
-            <Slot name="card-title" />
-          </div>
-          <div className="c-card-main-content">
-            {children}
-          </div>
+        <div className="c-card-main-content">
+          {children}
         </div>
       </div>
-    </SlotsProvider>
-  )
-}
+    </div>
+  </SlotsProvider>
+)
 ```
 
-### Render elements directly inside each slots with `Fill`
+### Render elements directly inside each slots
 
 ```js
-function MyApp() {
-  return (
-    <Card>
-      <Fill name="card-image">
-        <img src='https://placekitten.com/200' />
-      </Fill>
-      <Fill name="card-title">
-        <h3>Mew</h3>
-      </Fill>
-      <p>Purr purr purr</p>
-    </Card>
-  )
+import { Fill } from 'nano-slots'
+import { Card } from './card'
+
+const MyApp = () => (
+  <Card>
+    <Fill name="card-image">
+      <img src='https://placekitten.com/200' />
+    </Fill>
+    <Fill name="card-title">
+      <h3>Mew</h3>
+    </Fill>
+    <p>Purr purr purr</p>
+  </Card>
+)
+```
+
+## 📖 API
+
+### `SlotsProvider`
+
+```js
+import { SlotsProvider } from 'nano-slots'
+```
+
+#### Props
+
+- `children: ReactNode` — any valid react children element
+
+#### Description
+
+Creates a context for `Slot` / `Fill` components.
+
+### `Slot`
+
+```js
+import { Slot } from 'nano-slots'
+```
+
+#### Props
+
+- `name: string` — unique slot name for current `SlotsProvider`
+- `children?: ReactNode` — fallback in case `Fill` with matching `name` not provided, optional
+
+#### Description
+
+Define target slot for `Fill` component, can be used multiple times with same name inside each `SlotsProvider`
+
+### `Fill`
+
+```js
+import { Fill } from 'nano-slots'
+```
+
+#### Props
+
+- `name: string` — unique slot name for current `SlotsProvider`
+- `children: ReactNode` — will be rendered inside matching `Slot`
+
+#### Description
+
+Render children into matching `Slot` of current `SlotsProvider`.
+
+### Types
+
+```ts
+export interface SlotsProviderProps {
+  children: React.ReactNode;
 }
+
+export function SlotsProvider(props: SlotsProviderProps): JSX.Element;
+
+export interface SlotProps {
+  name: string;
+  children?: React.ReactNode;
+}
+
+export function Slot(props: SlotProps): JSX.Element;
+
+export interface FillProps {
+  name: string;
+  children: React.ReactNode;
+}
+
+export function Fill(props: FillProps): null;
 ```
 
 ## Alternatives
