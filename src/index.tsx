@@ -12,11 +12,6 @@ import {
 
 import isServer from './is-server'
 
-// @ts-expect-error
-// Stub __assign used in places of `Object.assign` to reduce library size,
-// most of the projects already includes polyfill or native support
-const __assign = Object.assign
-
 const useUniversalEffect = (
   effect: React.EffectCallback,
   deps: React.DependencyList
@@ -68,9 +63,9 @@ export function Slot(props: SlotProps) {
   const [state, setState] = useState<React.ReactNode>()
 
   const emitter = useSlotsContext()
-  const ref = useRef<Unsubscribe | null>(null)
+  const ref = useRef<Unsubscribe | null>()
 
-  if (ref.current === null) {
+  if (ref.current === undefined) {
     ref.current = emitter.on(props.name, setState)
   }
 
