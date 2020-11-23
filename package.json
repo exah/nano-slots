@@ -44,7 +44,7 @@
     "nanoevents": "^5.1.10"
   },
   "peerDependencies": {
-    "react": "^17.0.0"
+    "react": "^16.0.0 || ^17.0.0"
   },
   "devDependencies": {
     "@size-limit/preset-small-lib": "^4.9.0",

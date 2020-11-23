@@ -1,6 +1,6 @@
 import '@testing-library/jest-dom/extend-expect'
 import { screen, render } from '@testing-library/react'
-import { useState } from 'react'
+import { createElement as h, useState } from 'react'
 import { hydrate } from 'react-dom'
 import { renderToString } from 'react-dom/server'
 import { Fill, Slot, SlotsProvider } from '.'

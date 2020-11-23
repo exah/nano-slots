@@ -1,11 +1,13 @@
 import { createNanoEvents, Emitter, EventsMap, Unsubscribe } from 'nanoevents'
 import {
   createContext,
+  createElement as h,
   useContext,
   useLayoutEffect,
   useMemo,
   useRef,
   useState,
+  Fragment,
 } from 'react'
 
 import isServer from './is-server'
@@ -80,7 +82,7 @@ export function Slot(props: SlotProps) {
     return emitter.on(props.name, setState)
   }, [emitter, props.name])
 
-  return <>{state === undefined ? props.children : state}</>
+  return <Fragment>{state === undefined ? props.children : state}</Fragment>
 }
 
 export interface FillProps extends SlotProps {}

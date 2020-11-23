@@ -7,7 +7,7 @@ A super lightweight modern alternative to [`react-slot-fill`](https://github.com
 - [x] Speedy - `Fill` and `Slot` communicate directly with each other
 - [x] Tested with [`testing-library`](https://testing-library.com)
 - [x] Uses [`nanoevents`](https://github.com/ai/nanoevents) under hood
-- [x] Only 430 B (including deps)
+- [x] Only 421 B (including deps)
 
 ## 📦 Install
 

@@ -4,7 +4,8 @@
     "target": "es5",
     "moduleResolution": "node",
     "strict": true,
-    "jsx": "react-jsx",
+    "jsx": "react",
+    "jsxFactory": "h",
     "esModuleInterop": true,
     "noUnusedLocals": true
   },
