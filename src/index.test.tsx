@@ -13,6 +13,29 @@ const SLOT_NAMES = {
   NESTED: Symbol('nested-slot'),
 } as const
 
+const NS = createSlots<'foo' | 'bar'>()
+
+const List = ({ children }: { children: React.ReactNode }) => (
+  <ul>
+    <li>
+      <NS.Slot name="foo" />
+    </li>
+    <li>
+      <NS.Slot name="bar" />
+    </li>
+    <li>
+      <NS.Slot
+        // This name not specified in types when `createSlots` was called
+        // @ts-expect-error
+        name="baz"
+      >
+        Baz Fallback
+      </NS.Slot>
+    </li>
+    {children}
+  </ul>
+)
+
 const Parent = ({ children }: { children: React.ReactNode }) => (
   <SlotsProvider>
     <ul>
@@ -144,29 +167,6 @@ test('hydrate without errors on server render', async () => {
 })
 
 test('create isolated context with specified types', async () => {
-  const NS = createSlots<'foo' | 'bar'>()
-
-  const List = ({ children }: { children: React.ReactNode }) => (
-    <ul>
-      <li>
-        <NS.Slot name="foo" />
-      </li>
-      <li>
-        <NS.Slot name="bar" />
-      </li>
-      <li>
-        <NS.Slot
-          // This name not specified in types when `createSlots` was called
-          // @ts-expect-error
-          name="baz"
-        >
-          Baz Fallback
-        </NS.Slot>
-      </li>
-      {children}
-    </ul>
-  )
-
   render(
     <NS.Provider>
       <List>
@@ -181,4 +181,18 @@ test('create isolated context with specified types', async () => {
   expect(items[0]).toHaveTextContent('Foo')
   expect(items[1]).toHaveTextContent('Bar')
   expect(items[2]).toHaveTextContent('Baz Fallback')
+})
+
+test('isolated context without provider', async () => {
+  render(
+    <List>
+      <NS.Fill name="foo">Foo</NS.Fill>
+      <NS.Fill name="bar">Bar</NS.Fill>
+    </List>
+  )
+
+  const items = screen.getAllByRole('listitem')
+
+  expect(items[0]).toHaveTextContent('Foo')
+  expect(items[1]).toHaveTextContent('Bar')
 })
