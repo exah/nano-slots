@@ -11,14 +11,17 @@ import {
 
 import isServer from './is-server'
 
-type Unsubscribe = () => void
-type Callback = (node: React.ReactNode) => void
-type Events = { [K in string | symbol]: Callback }
-
-interface Emitter<E extends Events> {
-  emit<K extends keyof E>(event: K, node: React.ReactNode): void
-  on<K extends keyof E>(event: K, cb: E[K]): Unsubscribe
+export interface ProviderProps {
+  children: React.ReactNode
 }
+
+export interface SlotProps<Names extends PropertyKey = PropertyKey> {
+  name: Names
+  children?: React.ReactNode
+}
+
+export interface FillProps<Names extends PropertyKey = PropertyKey>
+  extends SlotProps<Names> {}
 
 const useUniversalEffect = (
   effect: React.EffectCallback,
@@ -27,87 +30,94 @@ const useUniversalEffect = (
   if (isServer()) {
     const cleanup = effect()
     if (cleanup) cleanup()
-    return
+  } else {
+    useLayoutEffect(effect, deps)
+  }
+}
+
+export const { Provider: SlotsProvider, Slot, Fill } = create<PropertyKey>()
+
+export default function create<Names extends PropertyKey>() {
+  type Unsubscribe = () => void
+  type Callback = (node: React.ReactNode) => void
+  type Events = { [K in Names]: Callback[] }
+
+  interface Emitter {
+    emit<K extends Names>(event: K, node: React.ReactNode): void
+    on<K extends Names>(event: K, cb: Callback): Unsubscribe
   }
 
-  return useLayoutEffect(effect, deps)
-}
+  const SlotsContext = createContext<Emitter | null>(null)
 
-const SlotsContext = createContext<Emitter<Events> | null>(null)
+  function Provider(props: ProviderProps) {
+    const emitter = useMemo((): Emitter => {
+      const events: Partial<Events> = {}
+      return {
+        emit(event, node) {
+          const source = events[event]
+          if (source) source.forEach((cb) => cb(node))
+        },
+        on(event, cb) {
+          const source = (events[event] = events[event] || [])!
+          source.push(cb)
+          return () => {
+            events[event] = source.filter((item) => item !== cb)
+          }
+        },
+      }
+    }, [])
 
-export interface SlotsProviderProps {
-  children: React.ReactNode
-}
+    return (
+      <SlotsContext.Provider value={emitter}>
+        {props.children}
+      </SlotsContext.Provider>
+    )
+  }
 
-export function SlotsProvider(props: SlotsProviderProps) {
-  const emitter = useMemo(function <E extends Events>(): Emitter<E> {
-    const events: { [K in keyof E]?: E[K][] } = {}
-    return {
-      emit(event, node) {
-        const source = events[event]
-        if (source) source.forEach((cb) => cb(node))
-      },
-      on(event, cb) {
-        const source = (events[event] = events[event] || [])!
-        source.push(cb)
-        return () => {
-          events[event] = source.filter((item) => item !== cb)
-        }
-      },
+  function useSlotsContext() {
+    const context = useContext(SlotsContext)
+
+    if (context === null) {
+      throw new Error('Must be used inside `Provider`')
     }
-  }, [])
 
-  return (
-    <SlotsContext.Provider value={emitter}>
-      {props.children}
-    </SlotsContext.Provider>
-  )
-}
-
-function useSlotsContext() {
-  const context = useContext(SlotsContext)
-
-  if (context === null) {
-    throw new Error('Must be used inside `SlotsProvider`')
+    return context
   }
 
-  return context
-}
+  function Slot(props: SlotProps<Names>) {
+    const [state, setState] = useState<React.ReactNode>()
 
-export interface SlotProps {
-  name: string | symbol
-  children?: React.ReactNode
-}
+    const emitter = useSlotsContext()
+    const ref = useRef<Unsubscribe | null>()
 
-export function Slot(props: SlotProps) {
-  const [state, setState] = useState<React.ReactNode>()
-
-  const emitter = useSlotsContext()
-  const ref = useRef<Unsubscribe | null>()
-
-  if (ref.current === undefined) {
-    ref.current = emitter.on(props.name, setState)
-  }
-
-  useUniversalEffect(() => {
-    if (ref.current) {
-      ref.current()
-      ref.current = null
+    if (ref.current === undefined) {
+      ref.current = emitter.on(props.name, setState)
     }
-    return emitter.on(props.name, setState)
-  }, [emitter, props.name])
 
-  return <Fragment>{state === undefined ? props.children : state}</Fragment>
-}
+    useUniversalEffect(() => {
+      if (ref.current) {
+        ref.current()
+        ref.current = null
+      }
+      return emitter.on(props.name, setState)
+    }, [emitter, props.name])
 
-export interface FillProps extends SlotProps {}
+    return <Fragment>{state === undefined ? props.children : state}</Fragment>
+  }
 
-export function Fill(props: FillProps) {
-  const emitter = useSlotsContext()
+  function Fill(props: FillProps<Names>) {
+    const emitter = useSlotsContext()
 
-  useUniversalEffect(() => {
-    emitter.emit(props.name, props.children)
-  }, [emitter, props.name, props.children])
+    useUniversalEffect(() => {
+      emitter.emit(props.name, props.children)
+    }, [emitter, props.name, props.children])
 
-  return null
+    return null
+  }
+
+  return {
+    Provider,
+    Slot,
+    Fill,
+  }
 }
