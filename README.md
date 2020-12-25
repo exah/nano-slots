@@ -6,6 +6,7 @@ A super lightweight modern alternative to [`react-slot-fill`](https://github.com
 - [x] Render content of sub-component in multiple places
 - [x] Speedy - `Fill` and `Slot` communicate directly with each other
 - [x] Tested with [`testing-library`](https://testing-library.com)
+- [x] Written in TypeScript
 - [x] Zero dependencies
 - [x] Only ~396 B
 
@@ -116,28 +117,52 @@ import { Fill } from 'nano-slots'
 
 Render children into matching `Slot` of current `SlotsProvider`.
 
+
+### `createSlots`
+
+```js
+import createSlots from 'nano-slots'
+```
+
+#### Description
+
+Designed for more advanced usages and stronger types.
+Returns an object containing:
+
+- `.Provider` — same as [`SlotsProvider`](#SlotsProvider), but with different context
+- `.Slot` — same as [`Slot`](#Slot), but with own context
+- `.Fill` — same as [`Fill`](#Fill), but with own context
+
+Returned `Slot` and `Fill` can be used without a `Provider`.
+
 ### Types
 
 ```ts
-export interface SlotsProviderProps {
+export interface ProviderProps {
   children: React.ReactNode;
 }
 
-export function SlotsProvider(props: SlotsProviderProps): JSX.Element;
+export function SlotsProvider(props: ProviderProps): JSX.Element;
 
-export interface SlotProps {
-  name: string;
+export interface SlotProps<Names extends PropertyKey> {
+  name: Names;
   children?: React.ReactNode;
 }
 
 export function Slot(props: SlotProps): JSX.Element;
 
-export interface FillProps {
-  name: string;
+export interface FillProps<Names extends PropertyKey> {
+  name: Names;
   children?: React.ReactNode;
 }
 
 export function Fill(props: FillProps): null;
+
+export default function createSlots<Names extends PropertyKey>(): {
+  Provider: (props: SlotsProviderProps): JSX.Element;
+  Slot: (props: SlotProps<Names>): JSX.Element;
+  Fill: (props: FillProps<Names>): null;
+}
 ```
 
 ## Alternatives
