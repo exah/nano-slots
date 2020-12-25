@@ -7,7 +7,7 @@ A super lightweight modern alternative to [`react-slot-fill`](https://github.com
 - [x] Speedy - `Fill` and `Slot` communicate directly with each other
 - [x] Tested with [`testing-library`](https://testing-library.com)
 - [x] Zero dependencies
-- [x] Only ~400 B
+- [x] Only ~396 B
 
 ## 📦 Install
 
