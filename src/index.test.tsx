@@ -8,22 +8,27 @@ import { Fill, Slot, SlotsProvider } from '.'
 let isServer = false
 jest.mock('./is-server', () => () => isServer)
 
+const SLOT_NAMES = {
+  FIRST: 'first-slot',
+  NESTED: Symbol('nested-slot'),
+} as const
+
 const Parent = ({ children }: { children: React.ReactNode }) => (
   <SlotsProvider>
     <ul>
       <li data-testid="slot-first">
-        <Slot name="first" />
+        <Slot name={SLOT_NAMES.FIRST} />
       </li>
       <li data-testid="children">{children}</li>
       <li>
         <ul>
           <li>1</li>
           <li data-testid="slot-nested">
-            <Slot name="nested" />
+            <Slot name={SLOT_NAMES.NESTED} />
           </li>
           <li>3</li>
           <li data-testid="slot-nested">
-            <Slot name="nested" />
+            <Slot name={SLOT_NAMES.NESTED} />
           </li>
         </ul>
       </li>
@@ -33,13 +38,13 @@ const Parent = ({ children }: { children: React.ReactNode }) => (
 )
 
 Parent.First = function ParentFirst() {
-  return <Fill name="first">First</Fill>
+  return <Fill name={SLOT_NAMES.FIRST}>First</Fill>
 }
 
 Parent.Nested = function ParentNested() {
   const [count, setCount] = useState(0)
   return (
-    <Fill name="nested">
+    <Fill name={SLOT_NAMES.NESTED}>
       <button type="button" onClick={() => setCount((s) => s + 1)}>
         {count}
       </button>

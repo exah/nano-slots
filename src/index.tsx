@@ -1,4 +1,3 @@
-import { createNanoEvents, Emitter, EventsMap, Unsubscribe } from 'nanoevents'
 import {
   createContext,
   createElement as h,
@@ -11,6 +10,15 @@ import {
 } from 'react'
 
 import isServer from './is-server'
+
+type Unsubscribe = () => void
+type Callback = (node: React.ReactNode) => void
+type Events = { [K in string | symbol]: Callback }
+
+interface Emitter<E extends Events> {
+  emit<K extends keyof E>(event: K, node: React.ReactNode): void
+  on<K extends keyof E>(event: K, cb: E[K]): Unsubscribe
+}
 
 const useUniversalEffect = (
   effect: React.EffectCallback,
@@ -25,18 +33,30 @@ const useUniversalEffect = (
   return useLayoutEffect(effect, deps)
 }
 
-interface SlotsEventsMap extends EventsMap {
-  [event: string]: (node: React.ReactNode) => void
-}
-
-const SlotsContext = createContext<Emitter<SlotsEventsMap> | null>(null)
+const SlotsContext = createContext<Emitter<Events> | null>(null)
 
 export interface SlotsProviderProps {
   children: React.ReactNode
 }
 
 export function SlotsProvider(props: SlotsProviderProps) {
-  const emitter = useMemo(() => createNanoEvents<SlotsEventsMap>(), [])
+  const emitter = useMemo(function <E extends Events>(): Emitter<E> {
+    const events: { [K in keyof E]?: E[K][] } = {}
+    return {
+      emit(event, node) {
+        const source = events[event]
+        if (source) source.forEach((cb) => cb(node))
+      },
+      on(event, cb) {
+        const source = (events[event] = events[event] || [])!
+        source.push(cb)
+        return () => {
+          events[event] = source.filter((item) => item !== cb)
+        }
+      },
+    }
+  }, [])
+
   return (
     <SlotsContext.Provider value={emitter}>
       {props.children}
@@ -55,7 +75,7 @@ function useSlotsContext() {
 }
 
 export interface SlotProps {
-  name: string
+  name: string | symbol
   children?: React.ReactNode
 }
 

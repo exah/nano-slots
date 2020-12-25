@@ -6,8 +6,8 @@ A super lightweight modern alternative to [`react-slot-fill`](https://github.com
 - [x] Render content of sub-component in multiple places
 - [x] Speedy - `Fill` and `Slot` communicate directly with each other
 - [x] Tested with [`testing-library`](https://testing-library.com)
-- [x] Uses [`nanoevents`](https://github.com/ai/nanoevents) under hood
-- [x] Only 414 B (including deps)
+- [x] Zero dependencies
+- [x] Only ~400 B
 
 ## 📦 Install
 

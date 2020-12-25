@@ -40,9 +40,7 @@
   "jest": {
     "preset": "ts-jest"
   },
-  "dependencies": {
-    "nanoevents": "^5.1.10"
-  },
+  "dependencies": {},
   "peerDependencies": {
     "react": "^16.0.0 || ^17.0.0"
   },
