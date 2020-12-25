@@ -1,9 +1,9 @@
 import '@testing-library/jest-dom/extend-expect'
 import { screen, render } from '@testing-library/react'
 import { createElement as h, useState } from 'react'
-import { hydrate } from 'react-dom'
+import { hydrate, unmountComponentAtNode } from 'react-dom'
 import { renderToString } from 'react-dom/server'
-import { Fill, Slot, SlotsProvider } from '.'
+import createSlots, { Fill, Slot, SlotsProvider } from '.'
 
 let isServer = false
 jest.mock('./is-server', () => () => isServer)
@@ -118,7 +118,7 @@ test('render nested node in multiple places', () => {
   defaultTest()
 })
 
-test('should hydrate without errors on server render', async () => {
+test('hydrate without errors on server render', async () => {
   isServer = true
 
   const root = document.createElement('div')
@@ -139,4 +139,46 @@ test('should hydrate without errors on server render', async () => {
   expect(error).not.toHaveBeenCalled()
 
   defaultTest()
+
+  unmountComponentAtNode(root)
+})
+
+test('create isolated context with specified types', async () => {
+  const NS = createSlots<'foo' | 'bar'>()
+
+  const List = ({ children }: { children: React.ReactNode }) => (
+    <ul>
+      <li>
+        <NS.Slot name="foo" />
+      </li>
+      <li>
+        <NS.Slot name="bar" />
+      </li>
+      <li>
+        <NS.Slot
+          // This name not specified in types when `createSlots` was called
+          // @ts-expect-error
+          name="baz"
+        >
+          Baz Fallback
+        </NS.Slot>
+      </li>
+      {children}
+    </ul>
+  )
+
+  render(
+    <NS.Provider>
+      <List>
+        <NS.Fill name="foo">Foo</NS.Fill>
+        <NS.Fill name="bar">Bar</NS.Fill>
+      </List>
+    </NS.Provider>
+  )
+
+  const items = screen.getAllByRole('listitem')
+
+  expect(items[0]).toHaveTextContent('Foo')
+  expect(items[1]).toHaveTextContent('Bar')
+  expect(items[2]).toHaveTextContent('Baz Fallback')
 })
