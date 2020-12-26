@@ -36,6 +36,22 @@ const List = ({ children }: { children: React.ReactNode }) => (
   </ul>
 )
 
+function Hidden({ children }: { children: React.ReactNode }) {
+  const [visible, setVisible] = useState<boolean>(false)
+  return (
+    <SlotsProvider>
+      {children}
+      <ul>
+        <li>
+          <Slot name="foo" />
+        </li>
+        <li>{visible && <Slot name="foo" />}</li>
+      </ul>
+      <button onClick={() => setVisible(true)}>Show</button>
+    </SlotsProvider>
+  )
+}
+
 const Parent = ({ children }: { children: React.ReactNode }) => (
   <SlotsProvider>
     <ul>
@@ -141,7 +157,7 @@ test('render nested node in multiple places', () => {
   defaultTest()
 })
 
-test('hydrate without errors on server render', async () => {
+test('hydrate without errors on server render', () => {
   isServer = true
 
   const root = document.createElement('div')
@@ -166,7 +182,7 @@ test('hydrate without errors on server render', async () => {
   unmountComponentAtNode(root)
 })
 
-test('create isolated context with specified types', async () => {
+test('create isolated context with specified types', () => {
   render(
     <NS.Provider>
       <List>
@@ -183,7 +199,7 @@ test('create isolated context with specified types', async () => {
   expect(items[2]).toHaveTextContent('Baz Fallback')
 })
 
-test('isolated context without provider', async () => {
+test('isolated context without provider', () => {
   render(
     <List>
       <NS.Fill name="foo">Foo</NS.Fill>
@@ -195,4 +211,22 @@ test('isolated context without provider', async () => {
 
   expect(items[0]).toHaveTextContent('Foo')
   expect(items[1]).toHaveTextContent('Bar')
+})
+
+test('use saved node when slot rendered later', async () => {
+  render(
+    <Hidden>
+      <Fill name="foo">Foo</Fill>
+    </Hidden>
+  )
+
+  const items = screen.getAllByRole('listitem')
+
+  expect(items[0]).toHaveTextContent('Foo')
+  expect(items[1]).toHaveTextContent('')
+
+  screen.getByRole('button', { name: 'Show' }).click()
+
+  expect(items[0]).toHaveTextContent('Foo')
+  expect(items[1]).toHaveTextContent('Foo')
 })

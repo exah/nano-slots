@@ -3,7 +3,6 @@ import {
   createElement as h,
   useContext,
   useLayoutEffect,
-  useRef,
   useState,
   Fragment,
 } from 'react'
@@ -14,8 +13,9 @@ type Unsubscribe = () => void
 type Callback = (node: React.ReactNode) => void
 
 interface Emitter<Names extends PropertyKey> {
-  emit(event: Names, node: React.ReactNode): void
   on(event: Names, cb: Callback): Unsubscribe
+  get(event: Names): React.ReactNode
+  emit(event: Names, node: React.ReactNode): Unsubscribe
 }
 
 export interface ProviderProps {
@@ -50,30 +50,22 @@ export default function createSlots<Names extends PropertyKey>() {
   }
 
   function Slot(props: SlotProps<Names>) {
-    const [state, setState] = useState<React.ReactNode>()
     const emitter = useContext(SlotsContext)
-    const ref = useRef<Unsubscribe | null>()
-
-    if (ref.current === undefined) {
-      ref.current = emitter.on(props.name, setState)
-    }
+    const [node, setNode] = useState<React.ReactNode>()
 
     useUniversalEffect(() => {
-      if (ref.current) {
-        ref.current()
-        ref.current = null
-      }
-      return emitter.on(props.name, setState)
+      setNode(emitter.get(props.name))
+      return emitter.on(props.name, setNode)
     }, [emitter, props.name])
 
-    return <Fragment>{state === undefined ? props.children : state}</Fragment>
+    return <Fragment>{node === undefined ? props.children : node}</Fragment>
   }
 
   function Fill(props: FillProps<Names>) {
     const emitter = useContext(SlotsContext)
 
     useUniversalEffect(() => {
-      emitter.emit(props.name, props.children)
+      return emitter.emit(props.name, props.children)
     }, [emitter, props.name, props.children])
 
     return null
@@ -87,12 +79,21 @@ export default function createSlots<Names extends PropertyKey>() {
 }
 
 function createEmitter<Names extends PropertyKey>(): Emitter<Names> {
-  const events: { [K in Names]?: Callback[] } = {}
+  const cache: Partial<Record<Names, React.ReactNode>> = {}
+  const events: Partial<Record<Names, Callback[]>> = {}
 
   return {
     emit(event, node) {
       const source = events[event]
       if (source) source.forEach((cb) => cb(node))
+
+      cache[event] = node
+      return () => {
+        cache[event] = undefined
+      }
+    },
+    get(event) {
+      return cache[event]
     },
     on(event, cb) {
       const source = (events[event] = events[event] || [])!
@@ -108,10 +109,7 @@ function useUniversalEffect(
   effect: React.EffectCallback,
   deps: React.DependencyList
 ) {
-  if (isServer()) {
-    const cleanup = effect()
-    if (cleanup) cleanup()
-  } else {
+  if (!isServer()) {
     useLayoutEffect(effect, deps)
   }
 }
