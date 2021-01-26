@@ -10,7 +10,7 @@ import {
 import isServer from './is-server'
 
 type Unsubscribe = () => void
-type Callback = (node: React.ReactNode) => void
+type Callback = (node?: React.ReactNode) => void
 
 interface Emitter<Names extends PropertyKey> {
   on(event: Names, cb: Callback): Unsubscribe
@@ -82,15 +82,17 @@ function createEmitter<Names extends PropertyKey>(): Emitter<Names> {
   const cache: Partial<Record<Names, React.ReactNode>> = {}
   const events: Partial<Record<Names, Callback[]>> = {}
 
+  function update(event: Names, node?: React.ReactNode) {
+    const source = events[event]
+    if (source) source.forEach((cb) => cb(node))
+
+    cache[event] = node
+  }
+
   return {
     emit(event, node) {
-      const source = events[event]
-      if (source) source.forEach((cb) => cb(node))
-
-      cache[event] = node
-      return () => {
-        cache[event] = undefined
-      }
+      update(event, node)
+      return () => update(event)
     },
     get(event) {
       return cache[event]

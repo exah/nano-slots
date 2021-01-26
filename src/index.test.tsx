@@ -230,3 +230,32 @@ test('use saved node when slot rendered later', async () => {
   expect(items[0]).toHaveTextContent('Foo')
   expect(items[1]).toHaveTextContent('Foo')
 })
+
+test('update slots, when fills no longer unmounted', async () => {
+  function Case() {
+    const [state, setState] = useState(true)
+    return (
+      <Hidden>
+        {state && <Fill name="foo">Foo</Fill>}
+        <button onClick={() => setState(false)}>Hide</button>
+      </Hidden>
+    )
+  }
+
+  render(<Case />)
+
+  const items = screen.getAllByRole('listitem')
+
+  expect(items[0]).toHaveTextContent('Foo')
+  expect(items[1]).toHaveTextContent('')
+
+  screen.getByRole('button', { name: 'Show' }).click()
+
+  expect(items[0]).toHaveTextContent('Foo')
+  expect(items[1]).toHaveTextContent('Foo')
+
+  screen.getByRole('button', { name: 'Hide' }).click()
+
+  expect(items[0]).toHaveTextContent('')
+  expect(items[1]).toHaveTextContent('')
+})
