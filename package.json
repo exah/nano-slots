@@ -29,7 +29,8 @@
     "test": "jest",
     "size": "size-limit",
     "release": "np",
-    "preversion": "npm run build"
+    "preversion": "npm run build",
+    "prebuild": "rm -rf cjs esm types"
   },
   "size-limit": [
     {
