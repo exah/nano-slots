@@ -259,3 +259,46 @@ test('update slots, when fills no longer unmounted', async () => {
   expect(items[0]).toHaveTextContent('')
   expect(items[1]).toHaveTextContent('')
 })
+
+test('call onChange when node appears or disappears', async () => {
+  const onChange = jest.fn()
+
+  function Comp({ children }: { children: React.ReactNode }) {
+    return (
+      <SlotsProvider>
+        <main>
+          <Slot name="foo" onChange={onChange}>
+            Fallback
+          </Slot>
+        </main>
+        {children}
+      </SlotsProvider>
+    )
+  }
+
+  function Case() {
+    const [state, setState] = useState(true)
+    return (
+      <Comp>
+        {state && <Fill name="foo">Content</Fill>}
+        <button onClick={() => setState(false)}>
+          {state ? 'Hide' : 'Show'}
+        </button>
+      </Comp>
+    )
+  }
+
+  render(<Case />)
+
+  const main = screen.getByRole('main')
+  const button = screen.getByRole('button', { name: 'Hide' })
+
+  expect(main).toHaveTextContent('Content')
+  expect(onChange).toHaveBeenCalledWith(true)
+
+  button.click()
+
+  expect(main).toHaveTextContent('Fallback')
+  expect(button).toHaveTextContent('Show')
+  expect(onChange).toHaveBeenCalledWith(false)
+})

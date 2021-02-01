@@ -22,13 +22,21 @@ export interface ProviderProps {
   children: React.ReactNode
 }
 
-export interface SlotProps<Names extends PropertyKey = PropertyKey> {
+export interface FillProps<Names extends PropertyKey = PropertyKey> {
+  /** Names used for matching `Slot` */
   name: Names
+  /** Will be rendered inside matching `Slot` */
   children?: React.ReactNode
 }
 
-export interface FillProps<Names extends PropertyKey = PropertyKey>
-  extends SlotProps<Names> {}
+export interface SlotProps<Names extends PropertyKey = PropertyKey> {
+  /** Names used for matching `Fill` */
+  name: Names
+  /** Fallback in case `Fill` not rendered */
+  children?: React.ReactNode
+  /** Detect node appearance */
+  onChange?(hasFilled: boolean): void
+}
 
 export const {
   Provider: SlotsProvider,
@@ -58,7 +66,13 @@ export default function createSlots<Names extends PropertyKey>() {
       return emitter.on(props.name, setNode)
     }, [emitter, props.name])
 
-    return <Fragment>{node === undefined ? props.children : node}</Fragment>
+    const has = node !== undefined
+
+    useUniversalEffect(() => {
+      if (props.onChange) props.onChange(has)
+    }, [has, props.onChange])
+
+    return <Fragment>{has ? node : props.children}</Fragment>
   }
 
   function Fill(props: FillProps<Names>) {

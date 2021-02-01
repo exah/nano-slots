@@ -8,7 +8,7 @@ A super lightweight modern alternative to [`react-slot-fill`](https://github.com
 - [x] Tested with [`testing-library`](https://testing-library.com)
 - [x] Written in TypeScript
 - [x] Zero dependencies
-- [x] Only ~382 B
+- [x] Only ~407 B
 
 ## 📦 Install
 
@@ -97,10 +97,11 @@ import { Slot } from 'nano-slots'
 
 - `name: string` — unique slot name for current `SlotsProvider`
 - `children?: ReactNode` — fallback in case `Fill` with matching `name` not provided, optional
+- `onChange?(hasFilled: boolean): void` — callback for detecting state changes, on `true` children of matching `Fill` is rendered and fallback is hidden
 
 #### Description
 
-Define the target slot for `Fill` component, can be used multiple times with the same name inside each `SlotsProvider`
+Define the target slot for `Fill` component. Can be used multiple times with the same name inside each `SlotsProvider`.
 
 ### `Fill`
 
