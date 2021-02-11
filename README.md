@@ -8,7 +8,7 @@ A super lightweight modern alternative to [`react-slot-fill`](https://github.com
 - [x] Tested with [`testing-library`](https://testing-library.com)
 - [x] Written in TypeScript
 - [x] Zero dependencies
-- [x] Only ~407 B
+- [x] Only ~431 B
 
 ## 📦 Install
 

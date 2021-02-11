@@ -3,7 +3,7 @@ import { screen, render } from '@testing-library/react'
 import { createElement as h, useState } from 'react'
 import { hydrate, unmountComponentAtNode } from 'react-dom'
 import { renderToString } from 'react-dom/server'
-import createSlots, { Fill, Slot, SlotsProvider } from '.'
+import createSlots, { Fill, Slot, SlotsProvider, createEmitter } from '.'
 
 let isServer = false
 jest.mock('./is-server', () => () => isServer)
@@ -301,4 +301,35 @@ test('call onChange when node appears or disappears', async () => {
   expect(main).toHaveTextContent('Fallback')
   expect(button).toHaveTextContent('Show')
   expect(onChange).toHaveBeenCalledWith(false)
+})
+
+test('should remove callbacks after cleanup', () => {
+  const cb1 = jest.fn()
+  const cb2 = jest.fn()
+  const cb3 = jest.fn()
+
+  const emitter = createEmitter()
+
+  const cleanup1 = emitter.on('event', cb1)
+  const cleanup2 = emitter.on('event', cb2)
+  const cleanup3 = emitter.on('event', cb3)
+
+  emitter.emit('event', 'first')
+  cleanup1()
+
+  emitter.emit('event', 'second')
+  cleanup2()
+
+  emitter.emit('event', 'third')
+  cleanup3()
+
+  emitter.emit('event', 'fourth')
+
+  expect(cb1).toHaveBeenCalledTimes(1)
+  expect(cb2).toHaveBeenCalledTimes(2)
+  expect(cb3).toHaveBeenCalledTimes(3)
+
+  expect(cb1).toHaveBeenLastCalledWith('first')
+  expect(cb2).toHaveBeenLastCalledWith('second')
+  expect(cb3).toHaveBeenLastCalledWith('third')
 })

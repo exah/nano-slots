@@ -92,7 +92,8 @@ export default function createSlots<Names extends PropertyKey>() {
   }
 }
 
-function createEmitter<Names extends PropertyKey>(): Emitter<Names> {
+/** @private Don't use! */
+export function createEmitter<Names extends PropertyKey>(): Emitter<Names> {
   const cache: Partial<Record<Names, React.ReactNode>> = {}
   const events: Partial<Record<Names, Callback[]>> = {}
 
@@ -115,7 +116,8 @@ function createEmitter<Names extends PropertyKey>(): Emitter<Names> {
       const source = (events[event] = events[event] || [])!
       source.push(cb)
       return () => {
-        events[event] = source.filter((item) => item !== cb)
+        const index = source.indexOf(cb)
+        if (index > -1) source.splice(index, 1)
       }
     },
   }
