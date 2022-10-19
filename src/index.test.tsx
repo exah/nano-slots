@@ -1,7 +1,8 @@
 import '@testing-library/jest-dom/extend-expect'
-import { screen, render } from '@testing-library/react'
+import { screen, render, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { createElement as h, useState } from 'react'
-import { hydrate, unmountComponentAtNode } from 'react-dom'
+import { hydrateRoot } from 'react-dom/client'
 import { renderToString } from 'react-dom/server'
 import createSlots, { Fill, Slot, SlotsProvider, createEmitter } from '.'
 
@@ -104,17 +105,17 @@ function nonNullable<T>(input: T): input is NonNullable<T> {
   return input != null
 }
 
-function defaultTest() {
-  const firstSlot = screen.getByTestId('slot-first')
-  const firstFill = screen.getByText('First')
+async function defaultTest() {
+  const firstSlot = await screen.findByTestId('slot-first')
+  const firstFill = await screen.findByText('First')
 
   expect(firstSlot).toBeInTheDocument()
   expect(firstFill).toBeInTheDocument()
 
   expect(firstSlot).toContainElement(firstFill)
 
-  const nestedSlots = screen.getAllByTestId('slot-nested')
-  const nestedFills = screen.getAllByText('Will be rendered in 2 places')
+  const nestedSlots = await screen.findAllByTestId('slot-nested')
+  const nestedFills = await screen.findAllByText('Will be rendered in 2 places')
 
   expect(nestedSlots).toHaveLength(2)
   expect(nestedFills).toHaveLength(2)
@@ -143,10 +144,12 @@ function defaultTest() {
     expect(button).toHaveTextContent('0')
   }
 
-  buttons[0].click()
+  await userEvent.click(buttons[0])
 
   for (const button of buttons) {
-    expect(button).toHaveTextContent('1')
+    await waitFor(() => {
+      expect(button).toHaveTextContent('1')
+    })
   }
 }
 
@@ -157,10 +160,10 @@ test('render nested node in multiple places', () => {
   defaultTest()
 })
 
-test('hydrate without errors on server render', () => {
+test('hydrateRoot without errors on server render', async () => {
   isServer = true
 
-  const root = document.createElement('div')
+  const target = document.createElement('div')
   const warn = jest.spyOn(console, 'warn')
   const error = jest.spyOn(console, 'error')
   const html = renderToString(element)
@@ -168,21 +171,21 @@ test('hydrate without errors on server render', () => {
   expect(warn).not.toHaveBeenCalled()
   expect(error).not.toHaveBeenCalled()
 
-  document.body.appendChild(root)
-  root.innerHTML = html
+  document.body.appendChild(target)
+  target.innerHTML = html
 
   isServer = false
-  hydrate(element, root)
+  const root = hydrateRoot(target, element)
 
   expect(warn).not.toHaveBeenCalled()
   expect(error).not.toHaveBeenCalled()
 
-  defaultTest()
+  await defaultTest()
 
-  unmountComponentAtNode(root)
+  root.unmount()
 })
 
-test('create isolated context with specified types', () => {
+test('create isolated context with specified types', async () => {
   render(
     <NS.Provider>
       <List>
@@ -225,7 +228,7 @@ test('use saved node when slot rendered later', async () => {
   expect(items[0]).toHaveTextContent('Foo')
   expect(items[1]).toHaveTextContent('')
 
-  screen.getByRole('button', { name: 'Show' }).click()
+  await userEvent.click(screen.getByRole('button', { name: 'Show' }))
 
   expect(items[0]).toHaveTextContent('Foo')
   expect(items[1]).toHaveTextContent('Foo')
@@ -249,12 +252,12 @@ test('update slots, when fills no longer unmounted', async () => {
   expect(items[0]).toHaveTextContent('Foo')
   expect(items[1]).toHaveTextContent('')
 
-  screen.getByRole('button', { name: 'Show' }).click()
+  await userEvent.click(screen.getByRole('button', { name: 'Show' }))
 
   expect(items[0]).toHaveTextContent('Foo')
   expect(items[1]).toHaveTextContent('Foo')
 
-  screen.getByRole('button', { name: 'Hide' }).click()
+  await userEvent.click(screen.getByRole('button', { name: 'Hide' }))
 
   expect(items[0]).toHaveTextContent('')
   expect(items[1]).toHaveTextContent('')
@@ -296,7 +299,7 @@ test('call onChange when node appears or disappears', async () => {
   expect(main).toHaveTextContent('Content')
   expect(onChange).toHaveBeenCalledWith(true)
 
-  button.click()
+  await userEvent.click(button)
 
   expect(main).toHaveTextContent('Fallback')
   expect(button).toHaveTextContent('Show')
